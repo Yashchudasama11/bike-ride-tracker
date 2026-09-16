@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bike Ride Tracker</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    color:#fff;
+    min-height:100vh;
+    padding-bottom:30px;
+}
+
+.container{
+    width:100%;
+    max-width:520px;
+    margin:auto;
+    padding:15px;
+}
+
+.header{
+    text-align:center;
+    padding:20px 10px;
+}
+
+.header h1{
+    font-size:27px;
+    margin-bottom:7px;
+}
+
+.header p{
+    color:#cbd5e1;
+    font-size:14px;
+}
+
+.card{
+    background:rgba(255,255,255,.09);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:20px;
+    padding:16px;
+    margin-bottom:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+.monthbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.monthbar button{
+    width:44px;
+    height:42px;
+    border:0;
+    border-radius:12px;
+    background:#334155;
+    color:white;
+    font-size:20px;
+}
+
+#monthTitle{
+    font-size:19px;
+    font-weight:bold;
+}
+
+.weekdays,.calendar{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:5px;
+}
+
+.weekdays div{
+    text-align:center;
+    font-size:12px;
+    color:#94a3b8;
+    padding:5px 0;
+}
+
+.day{
+    min-height:55px;
+    border:0;
+    border-radius:12px;
+    background:#334155;
+    color:white;
+    font-weight:bold;
+    font-size:13px;
+    padding:4px;
+}
+
+.day.empty{
+    background:transparent;
+}
+
+.day.ride{
+    background:#eab308;
+    color:#111827;
+}
+
+.day.noRide{
+    background:#ef4444;
+    color:white;
+}
+
+.day.paid{
+    background:#22c55e;
+    color:white;
+}
+
+.day.today{
+    outline:3px solid white;
+}
+
+.legend{
+    display:flex;
+    justify-content:space-around;
+    margin-top:15px;
+    font-size:12px;
+}
+
+.legend span{
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.dot{
+    width:13px;
+    height:13px;
+    border-radius:50%;
+    display:inline-block;
+}
+
+.yellow{background:#eab308}
+.red{background:#ef4444}
+.green{background:#22c55e}
+.gray{background:#334155}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+}
+
+.stat{
+    background:#1e293b;
+    border-radius:14px;
+    padding:13px 5px;
+    text-align:center;
+}
+
+.stat b{
+    display:block;
+    font-size:19px;
+    margin-bottom:4px;
+}
+
+.stat small{
+    color:#94a3b8;
+}
+
+button.action{
+    width:100%;
+    padding:14px;
+    border:0;
+    border-radius:14px;
+    background:#2563eb;
+    color:white;
+    font-weight:bold;
+    font-size:15px;
+    margin-top:8px;
+}
+
+button.action:active,
+.monthbar button:active{
+    transform:scale(.98);
+}
+
+input,select,textarea{
+    width:100%;
+    padding:13px;
+    margin-top:6px;
+    margin-bottom:12px;
+    border:1px solid #475569;
+    border-radius:12px;
+    background:#0f172a;
+    color:white;
+    font-size:15px;
+}
+
+label{
+    color:#cbd5e1;
+    font-size:13px;
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.75);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:15px;
+    z-index:10;
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modalBox{
+    width:100%;
+    max-width:480px;
+    max-height:90vh;
+    overflow:auto;
+    background:#1e293b;
+    border-radius:20px;
+    padding:20px;
+}
+
+.modalBox h2{
+    margin-bottom:15px;
+}
+
+.close{
+    float:right;
+    border:0;
+    background:#475569;
+    color:white;
+    width:35px;
+    height:35px;
+    border-radius:10px;
+}
+
+.status{
+    text-align:center;
+    padding:12px;
+    border-radius:12px;
+    background:#334155;
+    margin:10px 0;
+    font-weight:bold;
+}
+
+.weekItem,.historyItem{
+    background:#0f172a;
+    padding:14px;
+    border-radius:14px;
+    margin-bottom:10px;
+}
+
+.weekItem h3{
+    font-size:15px;
+    margin-bottom:8px;
+}
+
+.greenText{color:#22c55e}
+.yellowText{color:#eab308}
+.redText{color:#ef4444}
+
+.smallBtn{
+    border:0;
+    border-radius:9px;
+    padding:8px 10px;
+    margin-top:8px;
+    color:white;
+    background:#475569;
+}
+
+.danger{
+    background:#dc2626;
+}
+
+.success{
+    background:#16a34a;
+}
+
+.emptyText{
+    text-align:center;
+    color:#94a3b8;
+    padding:20px;
+}
+
+.footer{
+    text-align:center;
+    color:#64748b;
+    font-size:12px;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🏍️ Bike Ride Tracker</h1>
+        <p>Track your daily rides & weekly payments</p>
+    </div>
+
+    <div class="card">
+
+        <div class="monthbar">
+            <button onclick="changeMonth(-1)">‹</button>
+            <div id="monthTitle"></div>
+            <button onclick="changeMonth(1)">›</button>
+        </div>
+
+        <div class="weekdays">
+            <div>MON</div>
+            <div>TUE</div>
+            <div>WED</div>
+            <div>THU</div>
+            <div>FRI</div>
+            <div>SAT</div>
+            <div>SUN</div>
+        </div>
+
+        <div class="calendar" id="calendar"></div>
+
+        <div class="legend">
+            <span><i class="dot yellow"></i> Ride</span>
+            <span><i class="dot red"></i> No Ride</span>
+            <span><i class="dot green"></i> Week Paid</span>
+            <span><i class="dot gray"></i> Empty</span>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <div class="stats">
+            <div class="stat">
+                <b id="rideCount">0</b>
+                <small>Ride Days</small>
+            </div>
+
+            <div class="stat">
+                <b id="totalAmount">₹0</b>
+                <small>Total</small>
+            </div>
+
+            <div class="stat">
+                <b id="paidAmount">₹0</b>
+                <small>Paid</small>
+            </div>
+        </div>
+
+        <button class="action" onclick="openWeekPayment()">
+            💰 Complete Current Week Payment
+        </button>
+
+        <button class="action" onclick="openWeeklyHistory()">
+            📊 Weekly Payment History
+        </button>
+
+        <button class="action" onclick="openHistory()">
+            📋 All Ride History
+        </button>
+    </div>
+
+    <div class="footer">
+        Data is automatically saved on this device.
+    </div>
+
+</div>
+
+
+<!-- ENTRY MODAL -->
+
+<div class="modal" id="entryModal">
+
+<div class="modalBox">
+
+<button class="close" onclick="closeModal('entryModal')">×</button>
+
+<h2>🏍️ Ride Entry</h2>
+
+<label>Date</label>
+<input type="date" id="entryDate">
+
+<label>Ride Status</label>
+<select id="rideStatus">
+    <option value="ride">🟡 Ride Done</option>
+    <option value="noRide">🔴 No Ride</option>
+</select>
+
+<label>Ride Amount</label>
+<input type="number" id="rideAmount" placeholder="Enter amount">
+
+<label>Paid Amount</label>
+<input type="number" id="paidAmountInput" placeholder="Enter paid amount">
+
+<label>Payment Method</label>
+<select id="paymentMode">
+    <option value="Online">Online</option>
+    <option value="Cash">Cash</option>
+</select>
+
+<label>Notes</label>
+<textarea id="notes" rows="3" placeholder="Optional notes"></textarea>
+
+<div class="status" id="paymentStatus">
+    🔴 Payment Pending
+</div>
+
+<button class="action" onclick="saveEntry()">
+    💾 Save Entry
+</button>
+
+<button class="action danger" onclick="deleteEntry()">
+    🗑️ Delete Entry
+</button>
+
+</div>
+</div>
+
+
+<!-- WEEK PAYMENT MODAL -->
+
+<div class="modal" id="weekModal">
+
+<div class="modalBox">
+
+<button class="close" onclick="closeModal('weekModal')">×</button>
+
+<h2>💰 Weekly Payment</h2>
+
+<div id="weekDetails"></div>
+
+<button class="action success" onclick="completeWeek()">
+    ✅ COMPLETE WEEK PAYMENT
+</button>
+
+</div>
+</div>
+
+
+<!-- HISTORY MODAL -->
+
+<div class="modal" id="historyModal">
+
+<div class="modalBox">
+
+<button class="close" onclick="closeModal('historyModal')">×</button>
+
+<h2>📋 Ride History</h2>
+
+<div id="historyList"></div>
+
+</div>
+</div>
+
+
+<!-- WEEKLY HISTORY MODAL -->
+
+<div class="modal" id="weeklyModal">
+
+<div class="modalBox">
+
+<button class="close" onclick="closeModal('weeklyModal')">×</button>
+
+<h2>📊 Weekly Payment History</h2>
+
+<div id="weeklyList"></div>
+
+</div>
+</div>
+
+
+<script>
+
+let data = JSON.parse(
+    localStorage.getItem("bikeRideData") || "{}"
+);
+
+let currentDate = new Date();
+
+function saveData(){
+
+    localStorage.setItem(
+        "bikeRideData",
+        JSON.stringify(data)
+    );
+}
+
+
+function dateKey(date){
+
+    let y = date.getFullYear();
+
+    let m = String(date.getMonth()+1).padStart(2,"0");
+
+    let d = String(date.getDate()).padStart(2,"0");
+
+    return `${y}-${m}-${d}`;
+}
+
+
+function formatDate(key){
+
+    let d = new Date(key + "T00:00:00");
+
+    return d.toLocaleDateString(
+        "en-IN",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric"
+        }
+    );
+}
+
+
+function money(value){
+
+    return "₹" + Number(value || 0).toFixed(2);
+}
+
+
+function renderCalendar(){
+
+    const calendar =
+        document.getElementById("calendar");
+
+    calendar.innerHTML = "";
+
+    const year =
+        currentDate.getFullYear();
+
+    const month =
+        currentDate.getMonth();
+
+    const monthName =
+        currentDate.toLocaleDateString(
+            "en-IN",
+            {
+                month:"long",
+                year:"numeric"
+            }
+        );
+
+    document.getElementById("monthTitle")
+        .textContent = monthName;
+
+    let first =
+        new Date(year,month,1);
+
+    let start =
+        (first.getDay()+6)%7;
+
+    for(let i=0;i<start;i++){
+
+        let empty =
+            document.createElement("div");
+
+        empty.className = "day empty";
+
+        calendar.appendChild(empty);
+    }
+
+    let days =
+        new Date(year,month+1,0).getDate();
+
+    let today =
+        dateKey(new Date());
+
+    for(let day=1;day<=days;day++){
+
+        let d =
+            new Date(year,month,day);
+
+        let key =
+            dateKey(d);
+
+        let button =
+            document.createElement("button");
+
+        button.className = "day";
+
+        let item = data[key];
+
+        button.innerHTML = day;
+
+        if(item){
+
+            if(item.weekPaid){
+
+                button.classList.add("paid");
+
+            }
+            else if(item.status === "ride"){
+
+                button.classList.add("ride");
+
+            }
+            else{
+
+                button.classList.add("noRide");
+
+            }
+
+        }
+
+        if(key === today){
+
+            button.classList.add("today");
+
+        }
+
+        button.onclick = function(){
+
+            openEntry(key);
+
+        };
+
+        calendar.appendChild(button);
+    }
+
+    updateStats();
+}
+
+
+function changeMonth(value){
+
+    currentDate.setMonth(
+        currentDate.getMonth()+value
+    );
+
+    renderCalendar();
+}
+
+
+function openEntry(key){
+
+    document.getElementById("entryModal")
+        .classList.add("show");
+
+    document.getElementById("entryDate")
+        .value = key;
+
+    let item = data[key];
+
+    if(item){
+
+        document.getElementById("rideStatus")
+            .value = item.status;
+
+        document.getElementById("rideAmount")
+            .value = item.amount || "";
+
+        document.getElementById("paidAmountInput")
+            .value = item.paid || "";
+
+        document.getElementById("paymentMode")
+            .value = item.mode || "Online";
+
+        document.getElementById("notes")
+            .value = item.notes || "";
+
+    }
+    else{
+
+        document.getElementById("rideStatus")
+            .value = "ride";
+
+        document.getElementById("rideAmount")
+            .value = "";
+
+        document.getElementById("paidAmountInput")
+            .value = "";
+
+        document.getElementById("paymentMode")
+            .value = "Online";
+
+        document.getElementById("notes")
+            .value = "";
+
+    }
+
+    updatePaymentStatus();
+}
+
+
+function closeModal(id){
+
+    document.getElementById(id)
+        .classList.remove("show");
+}
+
+
+function saveEntry(){
+
+    let key =
+        document.getElementById("entryDate").value;
+
+    if(!key){
+
+        alert("Please select date.");
+
+        return;
+    }
+
+    let status =
+        document.getElementById("rideStatus").value;
+
+    let amount =
+        Number(document.getElementById("rideAmount").value || 0);
+
+    let paid =
+        Number(document.getElementById("paidAmountInput").value || 0);
+
+    if(amount < 0 || paid < 0){
+
+        alert("Amount cannot be negative.");
+
+        return;
+    }
+
+    if(paid > amount && amount > 0){
+
+        alert("Paid amount cannot be greater than ride amount.");
+
+        return;
+    }
+
+    data[key] = {
+
+        status:status,
+
+        amount:amount,
+
+        paid:paid,
+
+        mode:
+            document.getElementById("paymentMode").value,
+
+        notes:
+            document.getElementById("notes").value,
+
+        weekPaid:false
+    };
+
+    saveData();
+
+    closeModal("entryModal");
+
+    renderCalendar();
+
+}
+
+
+function deleteEntry(){
+
+    let key =
+        document.getElementById("entryDate").value;
+
+    if(!data[key]){
+
+        closeModal("entryModal");
+
+        return;
+    }
+
+    if(
+        confirm(
+            "Delete this ride entry?"
+        )
+    ){
+
+        delete data[key];
+
+        saveData();
+
+        closeModal("entryModal");
+
+        renderCalendar();
+    }
+}
+
+
+function updatePaymentStatus(){
+
+    let amount =
+        Number(
+            document.getElementById("rideAmount").value || 0
+        );
+
+    let paid =
+        Number(
+            document.getElementById("paidAmountInput").value || 0
+        );
+
+    let box =
+        document.getElementById("paymentStatus");
+
+    if(amount <= 0){
+
+        box.textContent =
+            "⚪ No Payment Amount";
+
+    }
+    else if(paid >= amount){
+
+        box.textContent =
+            "🟢 PAYMENT COMPLETED";
+
+    }
+    else if(paid > 0){
+
+        box.textContent =
+            "🟡 PARTIAL PAYMENT — Due " +
+            money(amount-paid);
+
+    }
+    else{
+
+        box.textContent =
+            "🔴 PAYMENT PENDING";
+    }
+}
+
+
+document.getElementById("rideAmount")
+    .addEventListener(
+        "input",
+        updatePaymentStatus
+    );
+
+document.getElementById("paidAmountInput")
+    .addEventListener(
+        "input",
+        updatePaymentStatus
+    );
+
+
+function updateStats(){
+
+    let year =
+        currentDate.getFullYear();
+
+    let month =
+        currentDate.getMonth();
+
+    let rides = 0;
+
+    let total = 0;
+
+    let paid = 0;
+
+    Object.keys(data).forEach(key=>{
+
+        let d =
+            new Date(key + "T00:00:00");
+
+        if(
+            d.getFullYear() === year &&
+            d.getMonth() === month
+        ){
+
+            let item = data[key];
+
+            if(item.status === "ride"){
+
+                rides++;
+
+                total += Number(item.amount || 0);
+
+                paid += Number(item.paid || 0);
+            }
+        }
+    });
+
+    document.getElementById("rideCount")
+        .textContent = rides;
+
+    document.getElementById("totalAmount")
+        .textContent = money(total);
+
+    document.getElementById("paidAmount")
+        .textContent = money(paid);
+}
+
+
+function getMonday(d){
+
+    let result =
+        new Date(d);
+
+    let day =
+        result.getDay();
+
+    let diff =
+        day === 0 ? -6 : 1-day;
+
+    result.setDate(
+        result.getDate()+diff
+    );
+
+    return result;
+}
+
+
+function getWeekDates(){
+
+    let monday =
+        getMonday(new Date());
+
+    let dates = [];
+
+    for(let i=0;i<7;i++){
+
+        let d =
+            new Date(monday);
+
+        d.setDate(
+            monday.getDate()+i
+        );
+
+        dates.push(dateKey(d));
+    }
+
+    return dates;
+}
+
+
+function openWeekPayment(){
+
+    let dates =
+        getWeekDates();
+
+    let total = 0;
+
+    let paid = 0;
+
+    let rideDays = 0;
+
+    dates.forEach(key=>{
+
+        let item = data[key];
+
+        if(item && item.status === "ride"){
+
+            rideDays++;
+
+            total += Number(item.amount || 0);
+
+            paid += Number(item.paid || 0);
+        }
+    });
+
+    let due =
+        Math.max(total-paid,0);
+
+    document.getElementById("weekDetails")
+        .innerHTML = `
+
+        <div class="weekItem">
+
+            <h3>Current Week</h3>
+
+            <p>🏍️ Ride Days: <b>${rideDays}</b></p>
+
+            <p>💰 Total: <b>${money(total)}</b></p>
+
+            <p>💵 Already Paid: <b>${money(paid)}</b></p>
+
+            <p>🔴 Due: <b>${money(due)}</b></p>
+
+        </div>
+
+        `;
+
+    document.getElementById("weekModal")
+        .classList.add("show");
+}
+
+
+function completeWeek(){
+
+    let dates =
+        getWeekDates();
+
+    let total = 0;
+
+    dates.forEach(key=>{
+
+        let item = data[key];
+
+        if(item && item.status === "ride"){
+
+            total += Number(item.amount || 0);
+
+            item.paid =
+                Number(item.amount || 0);
+
+            item.weekPaid = true;
+        }
+    });
+
+    if(total <= 0){
+
+        alert(
+            "This week has no ride entries."
+        );
+
+        return;
+    }
+
+    saveData();
+
+    closeModal("weekModal");
+
+    renderCalendar();
+
+    alert(
+        "✅ PAYMENT COMPLETED!\n\n" +
+        "Whole week is now GREEN.\n" +
+        "Total: " + money(total)
+    );
+}
+
+
+function openHistory(){
+
+    let list =
+        document.getElementById("historyList");
+
+    list.innerHTML = "";
+
+    let keys =
+        Object.keys(data).sort().reverse();
+
+    if(keys.length === 0){
+
+        list.innerHTML =
+            '<div class="emptyText">No ride history yet.</div>';
+
+    }
+
+    keys.forEach(key=>{
+
+        let item = data[key];
+
+        let status =
+            item.status === "ride"
+            ? '<span class="yellowText">🟡 Ride Done</span>'
+            : '<span class="redText">🔴 No Ride</span>';
+
+        if(item.weekPaid){
+
+            status =
+                '<span class="greenText">🟢 Week Paid</span>';
+        }
+
+        let div =
+            document.createElement("div");
+
+        div.className =
+            "historyItem";
+
+        div.innerHTML = `
+
+            <b>${formatDate(key)}</b>
+
+            <p>${status}</p>
+
+            <p>Amount: ${money(item.amount)}</p>
+
+            <p>Paid: ${money(item.paid)}</p>
+
+            <p>Mode: ${item.mode || "-"}</p>
+
+            <p>${item.notes || ""}</p>
+
+            <button
+                class="smallBtn"
+                onclick="editHistory('${key}')">
+                ✏️ Edit
+            </button>
+
+        `;
+
+        list.appendChild(div);
+    });
+
+    document.getElementById("historyModal")
+        .classList.add("show");
+}
+
+
+function editHistory(key){
+
+    closeModal("historyModal");
+
+    openEntry(key);
+}
+
+
+function openWeeklyHistory(){
+
+    let list =
+        document.getElementById("weeklyList");
+
+    list.innerHTML = "";
+
+    let weeks = {};
+
+    Object.keys(data).forEach(key=>{
+
+        let d =
+            new Date(key + "T00:00:00");
+
+        let monday =
+            getMonday(d);
+
+        let weekKey =
+            dateKey(monday);
+
+        if(!weeks[weekKey]){
+
+            weeks[weekKey] = [];
+        }
+
+        weeks[weekKey].push(key);
+    });
+
+    let weekKeys =
+        Object.keys(weeks).sort().reverse();
+
+    if(weekKeys.length === 0){
+
+        list.innerHTML =
+            '<div class="emptyText">No weekly history yet.</div>';
+    }
+
+    weekKeys.forEach(weekKey=>{
+
+        let total = 0;
+
+        let paid = 0;
+
+        let rides = 0;
+
+        weeks[weekKey].forEach(key=>{
+
+            let item = data[key];
+
+            if(item.status === "ride"){
+
+                rides++;
+
+                total += Number(item.amount || 0);
+
+                paid += Number(item.paid || 0);
+            }
+        });
+
+        let due =
+            Math.max(total-paid,0);
+
+        let status;
+
+        if(total > 0 && due === 0){
+
+            status =
+                '<span class="greenText">🟢 PAYMENT COMPLETED</span>';
+
+        }
+        else if(paid > 0){
+
+            status =
+                '<span class="yellowText">🟡 PARTIAL PAYMENT</span>';
+
+        }
+        else{
+
+            status =
+                '<span class="redText">🔴 PAYMENT PENDING</span>';
+        }
+
+        let monday =
+            new Date(weekKey + "T00:00:00");
+
+        let sunday =
+            new Date(monday);
+
+        sunday.setDate(
+            sunday.getDate()+6
+        );
+
+        let div =
+            document.createElement("div");
+
+        div.className =
+            "weekItem";
+
+        div.innerHTML = `
+
+            <h3>
+                ${formatDate(weekKey)}
+                → ${formatDate(dateKey(sunday))}
+            </h3>
+
+            <p>🏍️ Ride Days: ${rides}</p>
+
+            <p>💰 Total: ${money(total)}</p>
+
+            <p>💵 Paid: ${money(paid)}</p>
+
+            <p>🔴 Due: ${money(due)}</p>
+
+            <p style="margin-top:8px">${status}</p>
+
+        `;
+
+        list.appendChild(div);
+    });
+
+    document.getElementById("weeklyModal")
+        .classList.add("show");
+}
+
+
+renderCalendar();
+
+</script>
+
+</body>
+</html>
